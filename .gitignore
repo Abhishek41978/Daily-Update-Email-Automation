@@ -1,0 +1,6 @@
+node_modules/
+.env
+.sent-log.json
+logs.txt
+pm2-error.log
+pm2-out.log

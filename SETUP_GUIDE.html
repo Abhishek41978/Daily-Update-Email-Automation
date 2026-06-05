@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Task Report — Setup Guide</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#f1f5f9;color:#1e293b;line-height:1.6}
+  .container{max-width:860px;margin:0 auto;padding:32px 16px}
+  h1{font-size:26px;font-weight:700;color:#1e3a5f;margin-bottom:4px}
+  .subtitle{color:#64748b;font-size:14px;margin-bottom:32px}
+  .card{background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.07);margin-bottom:24px;overflow:hidden}
+  .card-header{background:linear-gradient(135deg,#1e3a5f,#2563eb);color:#fff;padding:16px 24px;font-weight:700;font-size:15px;display:flex;align-items:center;gap:10px}
+  .card-body{padding:24px}
+  .step{display:flex;gap:16px;margin-bottom:20px;align-items:flex-start}
+  .step-num{background:#dbeafe;color:#1d4ed8;border-radius:50%;width:28px;height:28px;min-width:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;margin-top:2px}
+  .step-content h3{font-size:14px;font-weight:700;color:#1e293b;margin-bottom:4px}
+  .step-content p{font-size:13px;color:#475569}
+  code{background:#f1f5f9;border:1px solid #e2e8f0;border-radius:4px;padding:2px 7px;font-size:12px;font-family:monospace;color:#1d4ed8}
+  pre{background:#0f172a;color:#e2e8f0;border-radius:6px;padding:16px;font-size:12px;font-family:monospace;overflow-x:auto;margin:10px 0;line-height:1.7}
+  .badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:600}
+  .badge-blue{background:#dbeafe;color:#1d4ed8}
+  .badge-green{background:#dcfce7;color:#15803d}
+  .badge-orange{background:#fff7ed;color:#c2410c}
+  .checklist{list-style:none}
+  .checklist li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:13px;color:#374151}
+  .checklist li:last-child{border:none}
+  .check{width:18px;height:18px;border:2px solid #2563eb;border-radius:4px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:.15s}
+  .check.done{background:#2563eb;border-color:#2563eb}
+  .check.done::after{content:'✓';color:#fff;font-size:11px;font-weight:700}
+  .flow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:12px 0}
+  .flow-item{background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:600;color:#1d4ed8;text-align:center}
+  .flow-arrow{color:#94a3b8;font-size:18px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{background:#f8fafc;padding:10px 14px;text-align:left;color:#475569;font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-bottom:2px solid #e2e8f0}
+  td{padding:10px 14px;border-bottom:1px solid #f1f5f9;color:#374151}
+  .alert{background:#fff7ed;border-left:4px solid #f59e0b;border-radius:4px;padding:12px 16px;font-size:13px;color:#92400e;margin:12px 0}
+  .alert-blue{background:#eff6ff;border-left-color:#2563eb;color:#1e40af}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Daily Task Report — Setup Guide</h1>
+  <p class="subtitle">Automated Bitbucket → Gmail report with Telegram trigger | Ascend Capital</p>
+
+  <!-- Architecture -->
+  <div class="card">
+    <div class="card-header">📐 System Architecture</div>
+    <div class="card-body">
+      <div class="flow">
+        <div class="flow-item">Bitbucket<br>API</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">Node.js<br>Script</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">Gmail<br>SMTP</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">Recipients<br>Email</div>
+      </div>
+      <div class="flow">
+        <div class="flow-item">Telegram<br>Bot</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">/sendmail<br>command</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item">Same<br>Script</div>
+      </div>
+      <table style="margin-top:16px">
+        <tr><th>Feature</th><th>Details</th></tr>
+        <tr><td>Repositories</td><td><code>ascend_los</code>, <code>ascend_internal_app</code></td></tr>
+        <tr><td>Cron schedule</td><td>9:15 PM IST daily</td></tr>
+        <tr><td>PR guard</td><td>Skips email if any PR was created today</td></tr>
+        <tr><td>Testing mode</td><td>Manual and Telegram sends can be repeated for the same day</td></tr>
+        <tr><td>Timezone</td><td>IST (Asia/Kolkata)</td></tr>
+        <tr><td>Sender</td><td>abhishekr@ascendcap.in</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Checklist -->
+  <div class="card">
+    <div class="card-header">✅ Setup Checklist</div>
+    <div class="card-body">
+      <ul class="checklist" id="cl">
+        <li><div class="check" onclick="toggle(this)"></div>Extract project folder and open terminal inside it</li>
+        <li><div class="check" onclick="toggle(this)"></div>Run <code>npm install</code></li>
+        <li><div class="check" onclick="toggle(this)"></div>Copy <code>.env.example</code> → <code>.env</code></li>
+        <li><div class="check" onclick="toggle(this)"></div>Get Bitbucket API Token (see Step 1 below)</li>
+        <li><div class="check" onclick="toggle(this)"></div>Fill <code>BITBUCKET_EMAIL</code> and <code>BITBUCKET_API_TOKEN</code> in <code>.env</code></li>
+        <li><div class="check" onclick="toggle(this)"></div>Get Gmail App Password (see Step 2 below)</li>
+        <li><div class="check" onclick="toggle(this)"></div>Fill <code>GMAIL_APP_PASSWORD</code> in <code>.env</code></li>
+        <li><div class="check" onclick="toggle(this)"></div>Create Telegram bot (see Step 3 below)</li>
+        <li><div class="check" onclick="toggle(this)"></div>Fill <code>TELEGRAM_BOT_TOKEN</code> in <code>.env</code></li>
+        <li><div class="check" onclick="toggle(this)"></div>Run <code>npm test</code> — all checks green</li>
+        <li><div class="check" onclick="toggle(this)"></div>Run <code>npm run send</code> — verify email received</li>
+        <li><div class="check" onclick="toggle(this)"></div>Install PM2: <code>npm install -g pm2</code></li>
+        <li><div class="check" onclick="toggle(this)"></div>Start with PM2: <code>npm run pm2</code></li>
+        <li><div class="check" onclick="toggle(this)"></div>Enable PM2 on boot: <code>pm2 startup</code> then <code>pm2 save</code></li>
+        <li><div class="check" onclick="toggle(this)"></div>Send <code>/sendmail</code> to your Telegram bot — verify it works</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Step 1: Bitbucket -->
+  <div class="card">
+    <div class="card-header">1️⃣ Bitbucket API Token</div>
+    <div class="card-body">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Go to Bitbucket Settings</h3>
+          <p>Visit <code>bitbucket.org</code> → Click your avatar (top right) → <strong>Personal Settings</strong> → <strong>API tokens</strong></p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Create API Token</h3>
+          <p>Click <strong>Create API token</strong>. Label: <code>daily-task-report</code></p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Select Permissions</h3>
+          <p>Grant read access for repositories, issues, and pull requests needed by this report.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Copy the token</h3>
+          <p>It is shown only once. Paste it into <code>.env</code> as <code>BITBUCKET_API_TOKEN</code>, and set <code>BITBUCKET_EMAIL</code> to the Atlassian account email that owns the token.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Gmail -->
+  <div class="card">
+    <div class="card-header">2️⃣ Gmail App Password</div>
+    <div class="card-body">
+      <div class="alert">Gmail App Passwords require 2-Step Verification to be enabled on your Google account.</div>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Enable 2-Step Verification</h3>
+          <p>Go to <code>myaccount.google.com</code> → Security → 2-Step Verification → Turn on</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Create App Password</h3>
+          <p>Go to <code>myaccount.google.com/apppasswords</code> → App: <strong>Mail</strong> → Device: <strong>Other</strong> → type <code>daily-report</code> → Generate</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Copy 16-character password</h3>
+          <p>Paste it (without spaces) into <code>.env</code> as <code>GMAIL_APP_PASSWORD</code></p>
+        </div>
+      </div>
+      <div class="alert alert-blue">If abhishekr@ascendcap.in is a Google Workspace account, an admin may need to allow App Passwords or less secure app access.</div>
+    </div>
+  </div>
+
+  <!-- Step 3: Telegram -->
+  <div class="card">
+    <div class="card-header">3️⃣ Telegram Bot Setup</div>
+    <div class="card-body">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Create a bot via BotFather</h3>
+          <p>Open Telegram → Search <code>@BotFather</code> → Send <code>/newbot</code></p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Choose name and username</h3>
+          <p>Name: <code>Ascend Task Report</code> &nbsp; Username: <code>ascend_taskreport_bot</code> (must end in _bot)</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Copy the token</h3>
+          <p>BotFather gives you a token like <code>123456:ABCdef...</code>. Paste it as <code>TELEGRAM_BOT_TOKEN</code></p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Get your Chat ID</h3>
+          <p>Start the bot, send any message, then visit:<br>
+          <code>https://api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</code><br>
+          Find <code>chat.id</code> in the response and set it as <code>TELEGRAM_CHAT_ID</code></p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <h3>Available bot commands</h3>
+          <p><code>/sendmail</code> — Send today's report now<br>
+          <code>/status</code> — Check if report was sent today<br>
+          <code>/help</code> — Show all commands</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PM2 Commands -->
+  <div class="card">
+    <div class="card-header">🚀 PM2 Commands Reference</div>
+    <div class="card-body">
+      <pre>npm install -g pm2          # Install PM2 globally
+npm run pm2                 # Start the app
+pm2 status                  # View running processes
+pm2 logs daily-task-report  # View live logs
+pm2 restart daily-task-report
+pm2 stop daily-task-report
+pm2 startup                 # Auto-start on server reboot
+pm2 save                    # Save current processes</pre>
+    </div>
+  </div>
+
+  <!-- Env file reference -->
+  <div class="card">
+    <div class="card-header">📄 .env File Reference</div>
+    <div class="card-body">
+      <pre>BITBUCKET_WORKSPACE=ascendcap
+BITBUCKET_REPOSITORIES=ascend_los,ascend_internal_app
+BITBUCKET_EMAIL=your-atlassian-account-email@example.com
+BITBUCKET_API_TOKEN=your_bitbucket_api_token
+
+EMAIL_SENDER=abhishekr@ascendcap.in
+EMAIL_RECIPIENTS=abhishekr@ascendcap.in
+GMAIL_APP_PASSWORD=your_16char_gmail_app_password
+
+TELEGRAM_BOT_TOKEN=123456789:ABCdefGHIjklMNOpqrSTUvwxYZ
+TELEGRAM_CHAT_ID=987654321</pre>
+      <p style="font-size:12px;color:#64748b;margin-top:8px">To add multiple email recipients, separate with commas:<br>
+      <code>EMAIL_RECIPIENTS=manager@ascendcap.in,ceo@ascendcap.in</code></p>
+    </div>
+  </div>
+
+</div>
+<script>
+function toggle(el) {
+  el.classList.toggle('done');
+  // persist in localStorage
+  const items = document.querySelectorAll('.check');
+  const state = Array.from(items).map(i => i.classList.contains('done'));
+  localStorage.setItem('checklist', JSON.stringify(state));
+}
+(function restore() {
+  try {
+    const state = JSON.parse(localStorage.getItem('checklist') || '[]');
+    const items = document.querySelectorAll('.check');
+    state.forEach((done, i) => { if (done && items[i]) items[i].classList.add('done'); });
+  } catch(_) {}
+})();
+</script>
+</body>
+</html>

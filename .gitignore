@@ -1,5 +1,6 @@
 node_modules/
 .env
+service-account.json
 .sent-log.json
 logs.txt
 pm2-error.log

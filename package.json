@@ -7,11 +7,13 @@
     "start": "node index.js",
     "send": "node index.js --send",
     "test": "node test.js",
-    "pm2": "pm2 start ecosystem.config.js"
+    "pm2": "pm2 start ecosystem.config.js",
+    "stage": "node build-stage.js"
   },
   "dependencies": {
     "axios": "^1.6.0",
     "dotenv": "^16.4.0",
+    "googleapis": "^173.0.0",
     "node-cron": "^3.0.3",
     "node-telegram-bot-api": "^0.65.1",
     "nodemailer": "^6.9.0"
